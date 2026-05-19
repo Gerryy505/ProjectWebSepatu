@@ -126,72 +126,49 @@
     </div>
   </div>
 
-  <script>
-    const form = document.getElementById('inputForm');
-    const tableBody = document.querySelector('#dataTable tbody');
-    let dataList = [];
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const nama = document.getElementById('nama').value;
-      const alamat = document.getElementById('alamat').value;
-      const kategori = document.getElementById('kategori').value;
-      const ukuran = document.getElementById('ukuran').value;
-      const harga = document.getElementById('harga').value;
-      const editIndex = document.getElementById('editIndex').value;
 
-      const newData = { nama, alamat, kategori, ukuran, harga };
+<script>
+document.getElementById('inputForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Cegah reload halaman
 
-      if (editIndex === "-1") {
-        dataList.push(newData);
-      } else {
-        dataList[editIndex] = newData;
-        document.getElementById('submitBtn').textContent = "Kirim";
-        document.getElementById('editIndex').value = "-1";
-      }
+    const nama = document.getElementById('nama').value;
+    const harga = document.getElementById('harga').value;
+    const alamat = document.getElementById('alamat').value;
+    const kategori = document.getElementById('kategori').value;
+    const ukuran = document.getElementById('ukuran').value;
 
-      renderTable();
-      form.reset();
-    });
+    const data = {
+        nama,
+        harga,
+        alamat,
+        kategori,
+        ukuran
+    };
 
-    function renderTable() {
-      tableBody.innerHTML = "";
-      dataList.forEach((data, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${data.nama}</td>
-          <td>${data.alamat}</td>
-          <td>${data.kategori}</td>
-          <td>${data.ukuran}</td>
-          <td>${data.harga}</td>
-          <td>
-            <button class="btn btn-sm btn-edit me-2" onclick="editData(${index})">Edit</button>
-            <button class="btn btn-sm btn-delete" onclick="deleteData(${index})">Hapus</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
+    try {
+        const response = await fetch('simpan.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            alert(result.message);
+            document.getElementById('inputForm').reset();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Terjadi kesalahan saat mengirim data: ' + error.message);
     }
+});
+</script>
 
-    function editData(index) {
-      const data = dataList[index];
-      document.getElementById('nama').value = data.nama;
-      document.getElementById('alamat').value = data.alamat;
-      document.getElementById('kategori').value = data.kategori;
-      document.getElementById('ukuran').value = data.ukuran;
-      document.getElementById('harga').value = data.harga;
-      document.getElementById('editIndex').value = index;
-      document.getElementById('submitBtn').textContent = "Update";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
 
-    function deleteData(index) {
-      if (confirm("Yakin ingin menghapus data ini?")) {
-        dataList.splice(index, 1);
-        renderTable();
-      }
-    }
-  </script>
 </body>
 </html>
